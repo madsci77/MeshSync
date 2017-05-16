@@ -1,0 +1,68 @@
+// MC9S08QG8
+
+//ENTRIES
+//	NVPROT NVOPT 
+//END
+
+/*
+
+NVPROT	DC.B	$FC     			; fpopen, flash protected (from 0xFE00) 
+NVOPT 	DC.B	%10000010		; backdoor enable, redirection enable, (un)secured flash [last 10]
+
+*/
+
+NAMES
+END
+
+SECTIONS
+  Z_RAM  = READ_WRITE 0x0060 TO 0x00FF;
+  RAM    = READ_WRITE 0x0100 TO 0x025F;
+  ROM    = READ_ONLY  0xE000 TO 0xF87F;  		// FDCC - FDFF is relocated vector table  
+  BROM	= READ_ONLY  0xFE00 TO 0xFFAF;
+  NVPROTROM = READ_ONLY 0xFFBD TO 0xFFBD;
+  NVOPTROM  = READ_ONLY 0xFFBF TO 0xFFBF;
+END
+
+PLACEMENT
+  DEFAULT_ROM                   INTO ROM;
+  DEFAULT_RAM                   INTO RAM;
+  _DATA_ZEROPAGE, MY_ZEROPAGE   INTO Z_RAM;
+  BOOTSTRAP_ROM                 INTO BROM;
+  NVPROT_ROM						  INTO NVPROTROM;
+  NVOPT_ROM							  INTO NVOPTROM;
+END
+
+STACKSIZE 0x70
+
+/*
+
+If FNORED = 0 and flash is protected, vectors are redirected to
+block starting at $FDC0.
+
+*/
+
+
+VECTOR 0  _Startup
+VECTOR 1  NullHandler			// SWI
+VECTOR 2  NullHandler			// IRQ
+VECTOR 3  NullHandler			// Low voltage detect
+VECTOR 4  NullHandler			// ---
+VECTOR 5  NullHandler			// TPM Channel 0
+VECTOR 6  NullHandler			// TPM Channel 1
+VECTOR 7  NullHandler			// TPM Overflow
+VECTOR 8  NullHandler			// ---
+VECTOR 9  NullHandler			// ---
+VECTOR 10 NullHandler			// ---
+VECTOR 11 NullHandler			// ---
+VECTOR 12 NullHandler			// MTIM
+VECTOR 13 NullHandler			// SPI
+VECTOR 14 NullHandler			// SCI error
+VECTOR 15 NullHandler			// SCI receive
+VECTOR 16 NullHandler			// SCI transmit
+VECTOR 17 NullHandler			// IIC
+VECTOR 18 rf12b_interrupt		// KBI
+VECTOR 19 NullHandler			// ADC
+VECTOR 20 NullHandler		   // ACMP
+VECTOR 21 NullHandler			// ---
+VECTOR 22 NullHandler			// ---
+VECTOR 23 tick						// RTI
